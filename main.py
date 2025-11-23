@@ -1,8 +1,9 @@
-import pygame
-import random
 import math
+import random
 import sys
 from typing import List, Tuple
+
+import pygame
 
 # -----------------------------
 # Game Constants
@@ -37,10 +38,10 @@ SCORE_POWER = 50
 SCORE_GHOST = 200
 
 # Tile Types
-WALL = '1'
-EMPTY = '0'
-DOT = '2'
-POWER = '3'
+WALL = "1"
+EMPTY = "0"
+DOT = "2"
+POWER = "3"
 
 
 def make_level() -> List[List[str]]:
@@ -87,7 +88,8 @@ def make_level() -> List[List[str]]:
     carve_rect(25, 12, 29, 17, WALL)
 
     # Ghost house (center box)
-    carve_rect(COLS // 2 - 3, ROWS // 2 - 2, COLS // 2 + 3, ROWS // 2 + 2, WALL)
+    carve_rect(COLS // 2 - 3, ROWS // 2 - 2,
+               COLS // 2 + 3, ROWS // 2 + 2, WALL)
     # Door to ghost house (remove a wall tile to make a door)
     grid[ROWS // 2 + 2][COLS // 2] = EMPTY
 
@@ -223,14 +225,30 @@ class Pacman:
         }[self.dir]
         start_angle = math.radians(direction_angle - angle)
         end_angle = math.radians(direction_angle + angle)
-        pygame.draw.circle(surface, YELLOW, (int(self.x), int(self.y)), self.radius)
+        pygame.draw.circle(
+            surface, YELLOW, (int(self.x), int(self.y)), self.radius)
         # Erase mouth wedge
-        mouth_rect = pygame.Rect(int(self.x - self.radius), int(self.y - self.radius), self.radius * 2, self.radius * 2)
-        pygame.draw.polygon(surface, BLACK, [
-            (self.x, self.y),
-            (self.x + math.cos(start_angle) * self.radius, self.y - math.sin(start_angle) * self.radius),
-            (self.x + math.cos(end_angle) * self.radius, self.y - math.sin(end_angle) * self.radius)
-        ])
+        mouth_rect = pygame.Rect(
+            int(self.x - self.radius),
+            int(self.y - self.radius),
+            self.radius * 2,
+            self.radius * 2,
+        )
+        pygame.draw.polygon(
+            surface,
+            BLACK,
+            [
+                (self.x, self.y),
+                (
+                    self.x + math.cos(start_angle) * self.radius,
+                    self.y - math.sin(start_angle) * self.radius,
+                ),
+                (
+                    self.x + math.cos(end_angle) * self.radius,
+                    self.y - math.sin(end_angle) * self.radius,
+                ),
+            ],
+        )
 
 
 class Ghost:
@@ -308,7 +326,13 @@ class Ghost:
             best_d = random.choice(dirs)
         return best_d
 
-    def update(self, grid: List[List[str]], pac_pos: Tuple[float, float], base_tile: Tuple[int, int], dt: float):
+    def update(
+        self,
+        grid: List[List[str]],
+        pac_pos: Tuple[float, float],
+        base_tile: Tuple[int, int],
+        dt: float,
+    ):
         # State timers
         if self.state == Ghost.VULNERABLE:
             self.vulnerable_timer -= dt
@@ -348,18 +372,34 @@ class Ghost:
 
     def draw(self, surface: pygame.Surface):
         if self.state == Ghost.VULNERABLE:
-            color = GREY if self.vulnerable_timer < 2.0 and int(self.vulnerable_timer * 10) % 2 == 0 else CYAN
+            color = (
+                GREY
+                if self.vulnerable_timer < 2.0
+                and int(self.vulnerable_timer * 10) % 2 == 0
+                else CYAN
+            )
         elif self.state == Ghost.EYES:
             color = WHITE
         else:
             color = self.color
-        pygame.draw.circle(surface, color, (int(self.x), int(self.y)), self.radius)
+        pygame.draw.circle(
+            surface, color, (int(self.x), int(self.y)), self.radius)
         # simple eyes
         eye_offset_x = 4 if self.dir[0] >= 0 else -4
-        pygame.draw.circle(surface, WHITE, (int(self.x - 4 + eye_offset_x), int(self.y - 4)), 3)
-        pygame.draw.circle(surface, WHITE, (int(self.x + 4 + eye_offset_x), int(self.y - 4)), 3)
-        pygame.draw.circle(surface, NAVY, (int(self.x - 4 + eye_offset_x), int(self.y - 4)), 1)
-        pygame.draw.circle(surface, NAVY, (int(self.x + 4 + eye_offset_x), int(self.y - 4)), 1)
+        pygame.draw.circle(
+            surface, WHITE, (int(self.x - 4 + eye_offset_x),
+                             int(self.y - 4)), 3
+        )
+        pygame.draw.circle(
+            surface, WHITE, (int(self.x + 4 + eye_offset_x),
+                             int(self.y - 4)), 3
+        )
+        pygame.draw.circle(
+            surface, NAVY, (int(self.x - 4 + eye_offset_x), int(self.y - 4)), 1
+        )
+        pygame.draw.circle(
+            surface, NAVY, (int(self.x + 4 + eye_offset_x), int(self.y - 4)), 1
+        )
 
 
 class Game:
@@ -393,7 +433,12 @@ class Game:
         self.win = False
 
         # Count initial pellets
-        self.total_pellets = sum(1 for r in range(ROWS) for c in range(COLS) if self.grid[r][c] in (DOT, POWER))
+        self.total_pellets = sum(
+            1
+            for r in range(ROWS)
+            for c in range(COLS)
+            if self.grid[r][c] in (DOT, POWER)
+        )
 
     def reset_positions_after_death(self):
         # Reset Pacman and ghosts but keep pellets and score
@@ -446,7 +491,9 @@ class Game:
 
         # Collisions Pacman-Ghost
         for g in self.ghosts:
-            if self._collide_circle(self.pacman.x, self.pacman.y, self.pacman.radius, g.x, g.y, g.radius):
+            if self._collide_circle(
+                self.pacman.x, self.pacman.y, self.pacman.radius, g.x, g.y, g.radius
+            ):
                 if g.state == Ghost.VULNERABLE:
                     g.eaten()
                     self.score += SCORE_GHOST
@@ -471,23 +518,36 @@ class Game:
                 x = c * TILE_SIZE
                 y = r * TILE_SIZE
                 if tile == WALL:
-                    pygame.draw.rect(self.screen, BLUE, (x, y, TILE_SIZE, TILE_SIZE))
+                    pygame.draw.rect(self.screen, BLUE,
+                                     (x, y, TILE_SIZE, TILE_SIZE))
                 else:
                     # draw pellets
                     if tile == DOT:
-                        pygame.draw.circle(self.screen, WHITE, (x + TILE_SIZE // 2, y + TILE_SIZE // 2), 3)
+                        pygame.draw.circle(
+                            self.screen,
+                            WHITE,
+                            (x + TILE_SIZE // 2, y + TILE_SIZE // 2),
+                            3,
+                        )
                     elif tile == POWER:
-                        pygame.draw.circle(self.screen, WHITE, (x + TILE_SIZE // 2, y + TILE_SIZE // 2), 6)
+                        pygame.draw.circle(
+                            self.screen,
+                            WHITE,
+                            (x + TILE_SIZE // 2, y + TILE_SIZE // 2),
+                            6,
+                        )
 
     def draw_hud(self):
         score_surf = self.font.render(f"Skor: {self.score}", True, WHITE)
         lives_surf = self.font.render(f"Nyawa: {self.lives}", True, WHITE)
         self.screen.blit(score_surf, (10, 5))
-        self.screen.blit(lives_surf, (SCREEN_WIDTH - lives_surf.get_width() - 10, 5))
+        self.screen.blit(lives_surf, (SCREEN_WIDTH -
+                         lives_surf.get_width() - 10, 5))
 
     def draw_center_text(self, text: str, color=WHITE, y_offset=0):
         surf = self.big_font.render(text, True, color)
-        rect = surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + y_offset))
+        rect = surf.get_rect(
+            center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + y_offset))
         self.screen.blit(surf, rect)
 
     def run(self):
